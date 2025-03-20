@@ -1,11 +1,17 @@
 import React from "react";
-import Header from "../components/auth/Header";
+import { useNavigate } from "react-router-dom";
 import StatCard from "../components/auth/StatCard";
 import TrendingSection from "../components/auth/TrendingSection";
 import MarketAnalysis from "../components/auth/MarketAnalysis";
 import Footer from "../components/auth/Footer";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
+  const handleSignupClick = () => {
+    navigate("/signup");
+  };
+
   return (
     <>
       <link
@@ -17,7 +23,6 @@ const HomePage = () => {
         rel="stylesheet"
       />
       <div className="flex flex-col bg-slate-50 min-h-screen">
-        <Header />
 
         <div className="px-6 py-12 mx-auto max-w-[1272px] max-sm:px-4">
           {/* Stats Cards */}
