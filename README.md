@@ -149,7 +149,7 @@
 
 ---
 
-## 🌎 Deployment Links (To be added)  
+## 🌎 Deployment Links   
 - **Frontend:** https://solevault.netlify.app/
 - **Backend:** [Render/Railway - TBD]  
 
