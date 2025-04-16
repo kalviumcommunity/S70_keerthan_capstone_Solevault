@@ -20,5 +20,9 @@ mongoose
 // Use sneaker routes
 app.use('/sneakers', sneakerRoutes);
 
+app.get('/',(req,res)=>{
+  res.send(`Hello, my backend server is running`)
+})
+
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`Server is running on port http://localhost:${PORT}`));
