@@ -25,7 +25,7 @@ const CustomButton = ({
     // Replaced hover:bg-solevault-900/10 with hover:bg-[#121212]/10
     // Replaced text-solevault-300 with text-[#999999]
     // Replaced hover:text-solevault-100 with hover:text-[#fafafa]
-    accent: "bg-[#212121] text-white hover:bg-[#212121]/90",
+    accent: "bg-[#212121] text-white hover:bg-[#212121]/80 hover:scale-105",
     // Replaced bg-solevault-accent with bg-[#212121]
     // Kept text-white
     // Replaced hover:bg-solevault-accent/90 with hover:bg-[#212121]/90
