@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const sneakerRoutes = require('./routes/sneakerRoutes'); // Import routes
+const authRoutes = require('./routes/auth');
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ mongoose
 
 // Use sneaker routes
 app.use('/sneakers', sneakerRoutes);
+app.use('/auth',authRoutes);
 
 app.get('/',(req,res)=>{
   res.send(`Hello, my backend server is running`)
