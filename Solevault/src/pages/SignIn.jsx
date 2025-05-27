@@ -1,5 +1,7 @@
+// SignIn.jsx
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+// Make sure useLocation is imported from react-router-dom
+import { Link, useNavigate, useLocation } from "react-router-dom"; 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import CustomButton from "@/components/ui/CustomButton";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import axios from 'axios'; // <<--- 1. Import axios
+import axios from 'axios';
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -16,10 +18,15 @@ const signInSchema = z.object({
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // <<--- 1. Get the location object
   const { toast } = useToast();
 
-  // 2. Define API_BASE_URL (ensure your .env file is set up correctly)
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  // 2. Determine where to redirect after login
+  // If 'from' state exists (passed by ProtectedRoute), use its pathname.
+  // Otherwise, default to '/dashboard'.
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const form = useForm({
     resolver: zodResolver(signInSchema),
@@ -29,22 +36,10 @@ const SignIn = () => {
     },
   });
 
-  // 3. Implement the onSubmit function
   const onSubmit = async (data) => {
-    // data will contain { email, password }
     try {
       console.log("Sign in attempt:", data);
-
-      // Determine the correct endpoint path based on your VITE_API_BASE_URL setup
-      // Option A: If VITE_API_BASE_URL is like "http://localhost:8000/auth"
-      // const signInEndpoint = `${API_BASE_URL}/signin`;
-      // Option B: If VITE_API_BASE_URL is like "http://localhost:8000"
-      // const signInEndpoint = `${API_BASE_URL}/auth/signin`;
-
-      // **Choose the option that matches your working signup configuration**
-      // Let's assume Option B is more standard for a base URL, adjust if needed:
-      const signInEndpoint = `${API_BASE_URL}/auth/signin`; // <<--- ADJUST THIS PATH if your VITE_API_BASE_URL already contains /auth
-
+      const signInEndpoint = `${API_BASE_URL}/auth/signin`; 
 
       const response = await axios.post(signInEndpoint, {
         email: data.email,
@@ -53,32 +48,34 @@ const SignIn = () => {
 
       console.log("Sign in successful:", response.data);
 
-      // The backend (without JWTs for now) sends back:
-      // { message: 'Logged in successfully!', user: { id, firstName, lastName, email } }
-      
-      toast({
-        title: "Sign In Successful!",
-        description: `Welcome back, ${response.data.user.firstName || 'User'}!`, // Use firstName if available
-      });
-      
-      // Here you might want to store user info in a global state (Context, Redux, Zustand)
-      // or localStorage if you need to access it elsewhere in the app.
-      // For example:
-      // localStorage.setItem('soleVaultUser', JSON.stringify(response.data.user));
+      if (response.data && response.data.token && response.data.user) {
+        localStorage.setItem('soleVaultToken', response.data.token); 
+        localStorage.setItem('soleVaultUser', JSON.stringify(response.data.user)); 
 
-      navigate("/dashboard"); // Or any other page you want to redirect to after login
+        toast({
+          title: "Sign In Successful!",
+          description: `Welcome back, ${response.data.user.firstName || 'User'}!`,
+        });
+        
+        // 3. Navigate to the 'from' location (original target or dashboard)
+        navigate(from, { replace: true }); // Use replace to avoid login page in history
+
+      } else {
+        console.error("Sign in response did not include token or user data:", response.data);
+        toast({
+          title: "Sign In Error",
+          description: "Received an unexpected response from the server.",
+          variant: "destructive",
+        });
+      }
 
     } catch (error) {
       console.error("Sign in error:", error);
       let errorMessage = "Failed to sign in. Please check your credentials.";
       
       if (error.response && error.response.data && error.response.data.message) {
-        // Use the error message from the backend if available
         errorMessage = error.response.data.message;
       }
-      // No specific check for error.response.status === 404 here, 
-      // as "Invalid credentials" (400/401) is more common for sign-in failures.
-      // A 404 would mean the /auth/signin endpoint itself wasn't found, which should be fixed.
       
       toast({
         title: "Sign In Error",
@@ -89,7 +86,8 @@ const SignIn = () => {
   };
 
   return (
-    <div className="page-wrapper"> {/* Replaced bg-black */}
+    // Your existing JSX for the SignIn form...
+    <div className="page-wrapper">
       <div className="bg-[#262626] border border-[#404040] rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full max-w-md p-8">
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
