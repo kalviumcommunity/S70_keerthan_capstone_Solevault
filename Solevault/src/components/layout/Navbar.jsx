@@ -1,30 +1,55 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-// Added LogIn icon for the Sign In button
-import { Search, User, Bell, Menu, X, LogIn } from "lucide-react"; 
+// Navbar.jsx
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Search, User, Bell, Menu, X, LogIn, LogOut } from "lucide-react"; 
 import CustomButton from "../ui/CustomButton"; // Assuming this path is correct
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null); // Local state for the user
   const navigate = useNavigate();
+  const location = useLocation(); // To help re-check localStorage on navigation
+
+  // Effect to check localStorage when the component mounts or route changes
+  useEffect(() => {
+    const storedUser = localStorage.getItem('soleVaultUser');
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Failed to parse stored user from localStorage:", error);
+        // Clear potentially corrupted data
+        localStorage.removeItem('soleVaultUser');
+        localStorage.removeItem('soleVaultToken'); // If user data is corrupt, token might be too or irrelevant
+        setCurrentUser(null);
+      }
+    } else {
+      setCurrentUser(null); // No user found in localStorage
+    }
+  }, [location.key]); // Re-run this effect when the route 'key' changes (on navigation)
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Handler for Sign Up button
   const handleSignUp = () => {
     navigate("/signup"); 
-    if (isMenuOpen) {
-      setIsMenuOpen(false); 
-    }
+    if (isMenuOpen) setIsMenuOpen(false);
   };
 
-  // Handler for Sign In button
   const handleSignIn = () => {
-    navigate("/signin"); // Navigate to the /signin route
-    if (isMenuOpen) {
-      setIsMenuOpen(false); // Close the mobile menu if it's open
-    }
+    navigate("/signin"); 
+    if (isMenuOpen) setIsMenuOpen(false);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('soleVaultUser');
+    localStorage.removeItem('soleVaultToken'); // Make sure to remove the token as well!
+    setCurrentUser(null); // Update local state to trigger re-render
+    navigate("/"); // Navigate to sign-in page (or homepage)
+    if (isMenuOpen) setIsMenuOpen(false);
+  };
+
+  // Derived state for convenience in conditional rendering
+  const isAuthenticated = !!currentUser;
 
   return (
     <nav className="bg-[#121212] border-b border-[#1a1a1a] py-4 sticky top-0 z-50">
@@ -57,16 +82,29 @@ const Navbar = () => {
           <button className="p-2 text-[#d4d4d4] hover:text-white transition-colors">
             <Bell size={20} />
           </button>
-          {/* Sign In Button Added Here */}
-          <CustomButton onClick={handleSignIn} variant="ghost"> {/* Adjust variant as needed */}
-            <LogIn size={16} className="mr-2" />
-            Sign In
-          </CustomButton>
-          {/* Sign Up Button */}
-          <CustomButton onClick={handleSignUp} variant="accent">
-            <User size={16} className="mr-2" /> 
-            Sign Up
-          </CustomButton>
+
+          {isAuthenticated && currentUser ? (
+            <>
+              <span className="text-[#d4d4d4] text-sm">
+                Hi, {currentUser.firstName || currentUser.email}
+              </span>
+              <CustomButton onClick={handleLogout} variant="outline"> {/* Adjust variant as needed */}
+                <LogOut size={16} className="mr-2" />
+                Logout
+              </CustomButton>
+            </>
+          ) : (
+            <>
+              <CustomButton onClick={handleSignIn} variant="ghost"> {/* Adjust variant as needed */}
+                <LogIn size={16} className="mr-2" />
+                Sign In
+              </CustomButton>
+              <CustomButton onClick={handleSignUp} variant="accent">
+                <User size={16} className="mr-2" /> 
+                Sign Up
+              </CustomButton>
+            </>
+          )}
         </div>
         
         {/* Mobile Navigation Toggle */}
@@ -107,36 +145,53 @@ const Navbar = () => {
             >
               Analytics
             </Link>
-            <div className="pt-3 mt-3 border-t border-[#1a1a1a] space-y-3"> {/* Use space-y-3 for buttons */}
-                {/* Sign In Button for Mobile */}
-                <CustomButton 
+            <div className="pt-3 mt-3 border-t border-[#1a1a1a] space-y-3">
+              {isAuthenticated && currentUser ? (
+                <>
+                  <div className="px-4 py-2 text-[#d4d4d4] text-sm">
+                    Hi, {currentUser.firstName || currentUser.email}
+                  </div>
+                  <CustomButton 
+                    size="md" 
+                    onClick={handleLogout} 
+                    variant="outline" // Adjust variant
+                    className="w-full"
+                  >
+                    <LogOut size={16} className="mr-2" />
+                    Logout
+                  </CustomButton>
+                </>
+              ) : (
+                <>
+                  <CustomButton 
                     size="md" 
                     onClick={handleSignIn} 
-                    variant="ghost" /* Adjust variant */
+                    variant="ghost" // Adjust variant
                     className="w-full" 
-                >
+                  >
                     <LogIn size={16} className="mr-2" />
                     Sign In
-                </CustomButton>
-                {/* Sign Up Button for Mobile */}
-                <CustomButton 
+                  </CustomButton>
+                  <CustomButton 
                     size="md" 
                     onClick={handleSignUp} 
                     variant="accent" 
                     className="w-full"
-                >
+                  >
                     <User size={16} className="mr-2" />
                     Sign Up
-                </CustomButton>
-                {/* Mobile Icons (optional placement) */}
-                <div className="flex space-x-3 pt-2 justify-center"> {/* Centered icons */}
-                    <button className="p-2 text-[#d4d4d4] hover:text-white transition-colors">
-                        <Search size={20} />
-                    </button>
-                    <button className="p-2 text-[#d4d4d4] hover:text-white transition-colors">
-                        <Bell size={20} />
-                    </button>
-                </div>
+                  </CustomButton>
+                </>
+              )}
+              {/* Mobile Icons */}
+              <div className="flex space-x-3 pt-2 justify-center">
+                <button className="p-2 text-[#d4d4d4] hover:text-white transition-colors">
+                  <Search size={20} />
+                </button>
+                <button className="p-2 text-[#d4d4d4] hover:text-white transition-colors">
+                  <Bell size={20} />
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -12,6 +12,7 @@ import Analytics from "./pages/Analytics";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Community from "./pages/Community";
+import ProtectedRoute from "./components/utility/ProtectedRoute"; // You already have this
 
 const queryClient = new QueryClient();
 
@@ -23,13 +24,46 @@ const App = () => (
           <Toaster />
           <Sonner />
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/community" element={<Community />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+
+            {/* Protected Routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/marketplace" 
+              element={
+                <ProtectedRoute>
+                  <Marketplace />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/analytics" 
+              element={
+                <ProtectedRoute>
+                  <Analytics />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/community" 
+              element={
+                <ProtectedRoute>
+                  <Community />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Catch-all Not Found Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
