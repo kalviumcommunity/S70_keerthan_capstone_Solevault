@@ -3,7 +3,7 @@
 // Define your backend API's base URL.
 // If your Vite dev server is configured to proxy /api to your backend,
 // you can just use '/api'. Otherwise, use the full backend URL (e.g., 'http://localhost:5000/api').
-const API_BASE_URL = 'https://s70-keerthan-capstone-solevault.onrender.com/'; // Adjust if your backend is on a different port/domain during development
+const API_BASE_URL = 'https://s70-keerthan-capstone-solevault.onrender.com'; // Adjust if your backend is on a different port/domain during development
 
 // Placeholder function to get the auth token.
 // You'll need to implement this based on how you store the token after login (e.g., localStorage).
