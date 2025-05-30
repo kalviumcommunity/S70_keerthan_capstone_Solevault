@@ -6,11 +6,10 @@ import CustomButton from "../ui/CustomButton"; // Assuming this path is correct
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null); // Local state for the user
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation(); // To help re-check localStorage on navigation
+  const location = useLocation();
 
-  // Effect to check localStorage when the component mounts or route changes
   useEffect(() => {
     const storedUser = localStorage.getItem('soleVaultUser');
     if (storedUser) {
@@ -18,37 +17,29 @@ const Navbar = () => {
         setCurrentUser(JSON.parse(storedUser));
       } catch (error) {
         console.error("Failed to parse stored user from localStorage:", error);
-        // Clear potentially corrupted data
         localStorage.removeItem('soleVaultUser');
-        localStorage.removeItem('soleVaultToken'); // If user data is corrupt, token might be too or irrelevant
+        localStorage.removeItem('soleVaultToken');
         setCurrentUser(null);
       }
     } else {
-      setCurrentUser(null); // No user found in localStorage
+      setCurrentUser(null);
     }
-  }, [location.key]); // Re-run this effect when the route 'key' changes (on navigation)
+  }, [location.key, location.pathname]); // Re-run on location.pathname too for explicit navigations
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  const handleSignUp = () => {
-    navigate("/signup"); 
-    if (isMenuOpen) setIsMenuOpen(false);
-  };
-
-  const handleSignIn = () => {
-    navigate("/signin"); 
-    if (isMenuOpen) setIsMenuOpen(false);
-  };
+  // handleSignUp and handleSignIn are no longer needed if using Link with asChild
+  // const handleSignUp = () => { /* ... */ };
+  // const handleSignIn = () => { /* ... */ };
 
   const handleLogout = () => {
     localStorage.removeItem('soleVaultUser');
-    localStorage.removeItem('soleVaultToken'); // Make sure to remove the token as well!
-    setCurrentUser(null); // Update local state to trigger re-render
-    navigate("/"); // Navigate to sign-in page (or homepage)
+    localStorage.removeItem('soleVaultToken');
+    setCurrentUser(null);
+    navigate("/"); 
     if (isMenuOpen) setIsMenuOpen(false);
   };
 
-  // Derived state for convenience in conditional rendering
   const isAuthenticated = !!currentUser;
 
   return (
@@ -60,55 +51,53 @@ const Navbar = () => {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link to="/dashboard" className="text-[#fafafa] hover:text-white transition-colors">
-            Dashboard
-          </Link>
-          <Link to="/marketplace" className="text-[#fafafa] hover:text-white transition-colors">
-            Marketplace
-          </Link>
-          <Link to="/community" className="text-[#fafafa] hover:text-white transition-colors">
-            Community
-          </Link>
-          <Link to="/analytics" className="text-[#fafafa] hover:text-white transition-colors">
-            Analytics
-          </Link>
+          <Link to="/dashboard" className="text-[#fafafa] hover:text-white transition-colors">Dashboard</Link>
+          <Link to="/marketplace" className="text-[#fafafa] hover:text-white transition-colors">Marketplace</Link>
+          <Link to="/community" className="text-[#fafafa] hover:text-white transition-colors">Community</Link>
+          <Link to="/analytics" className="text-[#fafafa] hover:text-white transition-colors">Analytics</Link>
         </div>
         
         {/* Desktop Auth Buttons Area */}
         <div className="hidden md:flex items-center space-x-4">
-          <button className="p-2 text-[#d4d4d4] hover:text-white transition-colors">
+          <button type="button" className="p-2 text-[#d4d4d4] hover:text-white transition-colors" aria-label="Search">
             <Search size={20} />
           </button>
-          <button className="p-2 text-[#d4d4d4] hover:text-white transition-colors">
+          <button type="button" className="p-2 text-[#d4d4d4] hover:text-white transition-colors" aria-label="Notifications">
             <Bell size={20} />
           </button>
 
           {isAuthenticated && currentUser ? (
             <>
               <span className="text-[#d4d4d4] text-sm">
-                Hi, {currentUser.firstName || currentUser.email}
+                Hi, {currentUser.firstName || currentUser.name || currentUser.email}
               </span>
-              <CustomButton onClick={handleLogout} variant="outline"> {/* Adjust variant as needed */}
+              <CustomButton type="button" onClick={handleLogout} variant="outline">
                 <LogOut size={16} className="mr-2" />
                 Logout
               </CustomButton>
             </>
           ) : (
             <>
-              <CustomButton onClick={handleSignIn} variant="ghost"> {/* Adjust variant as needed */}
-                <LogIn size={16} className="mr-2" />
-                Sign In
+              {/* --- MODIFIED FOR asChild PATTERN --- */}
+              <CustomButton asChild variant="ghost">
+                <Link to="/signin">
+                  <LogIn size={16} className="mr-2" />
+                  Sign In
+                </Link>
               </CustomButton>
-              <CustomButton onClick={handleSignUp} variant="accent">
-                <User size={16} className="mr-2" /> 
-                Sign Up
+              <CustomButton asChild variant="accent">
+                <Link to="/signup">
+                  <User size={16} className="mr-2" /> 
+                  Sign Up
+                </Link>
               </CustomButton>
+              {/* --- END MODIFICATION --- */}
             </>
           )}
         </div>
         
         {/* Mobile Navigation Toggle */}
-        <button className="md:hidden p-2 text-[#d4d4d4] hover:text-white" onClick={toggleMenu}>
+        <button type="button" className="md:hidden p-2 text-[#d4d4d4] hover:text-white" onClick={toggleMenu} aria-label="Toggle menu">
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -116,45 +105,23 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-[#121212] border-t border-[#1a1a1a] absolute w-full left-0 right-0 shadow-xl">
-          <div className="solevault-container py-4 space-y-3 mx-auto px-4 sm:px-6 lg:px-8">
-            <Link 
-              to="/dashboard" 
-              className="block px-4 py-3 text-[#fafafa] hover:bg-[#1a1a1a] rounded-md text-base"
-              onClick={toggleMenu}
-            >
-              Dashboard
-            </Link>
-            <Link 
-              to="/marketplace" 
-              className="block px-4 py-3 text-[#fafafa] hover:bg-[#1a1a1a] rounded-md text-base"
-              onClick={toggleMenu}
-            >
-              Marketplace
-            </Link>
-            <Link 
-              to="/community" 
-              className="block px-4 py-3 text-[#fafafa] hover:bg-[#1a1a1a] rounded-md text-base"
-              onClick={toggleMenu}
-            >
-              Community
-            </Link>
-            <Link 
-              to="/analytics" 
-              className="block px-4 py-3 text-[#fafafa] hover:bg-[#1a1a1a] rounded-md text-base"
-              onClick={toggleMenu}
-            >
-              Analytics
-            </Link>
+          <div className="solevault-container py-4 space-y-1 mx-auto px-4 sm:px-6 lg:px-8"> {/* Reduced space-y */}
+            <Link to="/dashboard" className="block px-4 py-3 text-[#fafafa] hover:bg-[#1a1a1a] rounded-md text-base" onClick={toggleMenu}>Dashboard</Link>
+            <Link to="/marketplace" className="block px-4 py-3 text-[#fafafa] hover:bg-[#1a1a1a] rounded-md text-base" onClick={toggleMenu}>Marketplace</Link>
+            <Link to="/community" className="block px-4 py-3 text-[#fafafa] hover:bg-[#1a1a1a] rounded-md text-base" onClick={toggleMenu}>Community</Link>
+            <Link to="/analytics" className="block px-4 py-3 text-[#fafafa] hover:bg-[#1a1a1a] rounded-md text-base" onClick={toggleMenu}>Analytics</Link>
+            
             <div className="pt-3 mt-3 border-t border-[#1a1a1a] space-y-3">
               {isAuthenticated && currentUser ? (
                 <>
                   <div className="px-4 py-2 text-[#d4d4d4] text-sm">
-                    Hi, {currentUser.firstName || currentUser.email}
+                    Hi, {currentUser.firstName || currentUser.name || currentUser.email}
                   </div>
                   <CustomButton 
+                    type="button"
                     size="md" 
                     onClick={handleLogout} 
-                    variant="outline" // Adjust variant
+                    variant="outline"
                     className="w-full"
                   >
                     <LogOut size={16} className="mr-2" />
@@ -163,32 +130,27 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <CustomButton 
-                    size="md" 
-                    onClick={handleSignIn} 
-                    variant="ghost" // Adjust variant
-                    className="w-full" 
-                  >
-                    <LogIn size={16} className="mr-2" />
-                    Sign In
+                  {/* --- MODIFIED FOR asChild PATTERN --- */}
+                  <CustomButton asChild size="md" variant="ghost" className="w-full">
+                    <Link to="/signin" onClick={toggleMenu}>
+                      <LogIn size={16} className="mr-2" />
+                      Sign In
+                    </Link>
                   </CustomButton>
-                  <CustomButton 
-                    size="md" 
-                    onClick={handleSignUp} 
-                    variant="accent" 
-                    className="w-full"
-                  >
-                    <User size={16} className="mr-2" />
-                    Sign Up
+                  <CustomButton asChild size="md" variant="accent" className="w-full">
+                    <Link to="/signup" onClick={toggleMenu}>
+                      <User size={16} className="mr-2" />
+                      Sign Up
+                    </Link>
                   </CustomButton>
+                  {/* --- END MODIFICATION --- */}
                 </>
               )}
-              {/* Mobile Icons */}
               <div className="flex space-x-3 pt-2 justify-center">
-                <button className="p-2 text-[#d4d4d4] hover:text-white transition-colors">
+                <button type="button" className="p-2 text-[#d4d4d4] hover:text-white transition-colors" aria-label="Search">
                   <Search size={20} />
                 </button>
-                <button className="p-2 text-[#d4d4d4] hover:text-white transition-colors">
+                <button type="button" className="p-2 text-[#d4d4d4] hover:text-white transition-colors" aria-label="Notifications">
                   <Bell size={20} />
                 </button>
               </div>

@@ -2,8 +2,12 @@
 const jwt = require('jsonwebtoken');
 
 // REMOVE these lines from the top:
-// const JWT_SECRET = process.env.JWT_SECRET;
-// if (!JWT_SECRET) { ... }
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+    console.error('CRITICAL: JWT_SECRET not available when authMiddleware.js was loaded.');
+    // Some might even throw an error here to stop the app from starting with a misconfiguration
+}
 
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;

@@ -1,12 +1,12 @@
 // backend/index.js
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const cors = require('cors');
 const sneakerRoutes = require('./routes/sneakerRoutes'); // Import routes
 const authRoutes = require('./routes/auth'); // This is your router from auth.js
 
-dotenv.config();
+
 
 const app = express();
 

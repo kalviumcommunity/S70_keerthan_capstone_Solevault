@@ -1,17 +1,17 @@
 // backend/routes/auth.js
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const User = require('../models/User'); // Adjust path if necessary
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 
-// REMOVE these lines from the top if they were there, JWT_SECRET is accessed inside functions
-// const JWT_SECRET = process.env.JWT_SECRET;
-// if (!JWT_SECRET) { ... }
+const JWT_APP_SECRET = process.env.JWT_SECRET;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
+// Standard Signup
 router.post('/signup', async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
 
-  // Input validations
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ message: 'Please provide firstName, lastName, email, and password.' });
   }
@@ -23,120 +23,156 @@ router.post('/signup', async (req, res) => {
   }
 
   try {
-    if (!User || typeof User.findOne !== 'function') {
-      console.error('CRITICAL ERROR in /signup: User model or User.findOne is not correctly defined.');
-      return res.status(500).json({ message: 'Server configuration error: User model not available.' });
+    if (!JWT_APP_SECRET) {
+      console.error('CRITICAL: JWT_SECRET is not configured for /signup.');
+      return res.status(500).json({ message: 'Server configuration error: Cannot create user session.' });
     }
+
     let existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({ message: 'User with this email already exists.' });
     }
-    const newUser = new User({ 
-      firstName,
-      lastName,
-      email: email.toLowerCase(),
-      password
-    });
+
+    const newUser = new User({ firstName, lastName, email: email.toLowerCase(), password });
     await newUser.save();
 
-    const payload = {
-      user: { id: newUser.id }
-    };
-
-    const currentJwtSecret = process.env.JWT_SECRET; 
-
-    if (!currentJwtSecret) {
-      console.error('CRITICAL: JWT_SECRET is missing at time of token signing in /signup.');
-      return res.status(500).json({ message: 'Server configuration error: Cannot create user session.' });
-    }
-
-    const token = jwt.sign(payload, currentJwtSecret, { expiresIn: '1h' }); 
+    const payload = { user: { id: newUser.id } };
+    const token = jwt.sign(payload, JWT_APP_SECRET, { expiresIn: '1d' }); 
     
     res.status(201).json({
       message: 'User registered successfully!',
       token: token,
-      user: {
-        id: newUser.id,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email
-      }
+      user: { id: newUser.id, firstName: newUser.firstName, lastName: newUser.lastName, email: newUser.email }
     });
 
   } catch (err) {
     if (err.name === 'ValidationError') {
-      let errors = {};
-      Object.keys(err.errors).forEach((key) => {
-        errors[key] = err.errors[key].message;
-      });
-      return res.status(400).json({ message: "Validation Error", errors });
+      const messages = Object.values(err.errors).map(val => val.message);
+      return res.status(400).json({ message: messages.join(', ') });
     }
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
-      return res.status(400).json({ message: 'User with this email already exists.' });
-    }
-    console.error('Signup error:', err.message, err.stack);
-    res.status(500).json({ message: 'Server error during signup.', error: err.message });
+    console.error('Signup error:', err);
+    res.status(500).json({ message: 'Server error during signup.'});
   }
 });
 
+// Standard Signin
 router.post('/signin', async (req, res) => {
   const { email, password } = req.body;
 
-  // Input validations
   if (!email || !password) {
     return res.status(400).json({ message: 'Please provide email and password.' });
   }
 
   try {
-    if (!User || typeof User.findOne !== 'function') {
-      console.error('CRITICAL ERROR in /signin: User model or User.findOne is not correctly defined.');
-      return res.status(500).json({ message: 'Server configuration error: User model not available.' });
-    }
-    
-    const foundUser = await User.findOne({ email: email.toLowerCase() });
-    
-    // --- THIS IS THE CRITICAL CHECK ---
-    if (!foundUser) {
-      // If no user is found with that email, send a 400 response and stop.
-      return res.status(400).json({ message: 'Invalid credentials. User not found.' });
-    }
-    // --- END CRITICAL CHECK ---
-
-    // If code reaches here, foundUser is an object (not null).
-    const isMatch = await foundUser.comparePassword(password);
-    if (!isMatch) {
-      // If passwords don't match, send a 400 response and stop.
-      return res.status(400).json({ message: 'Invalid credentials. Password incorrect.' });
-    }
-    
-    // If passwords match, proceed to generate token
-    const payload = {
-      user: { id: foundUser.id }
-    };
-
-    const currentJwtSecret = process.env.JWT_SECRET; 
-
-    if (!currentJwtSecret) {
-      console.error('CRITICAL: JWT_SECRET is missing at time of token signing in /signin.');
+    if (!JWT_APP_SECRET) {
+      console.error('CRITICAL: JWT_SECRET is not configured for /signin.');
       return res.status(500).json({ message: 'Server configuration error: Cannot create user session.' });
     }
 
-    const token = jwt.sign(payload, currentJwtSecret, { expiresIn: '1h' }); 
+    const foundUser = await User.findOne({ email: email.toLowerCase() });
+    if (!foundUser) {
+      return res.status(400).json({ message: 'Invalid credentials.' });
+    }
+    if (!foundUser.password) {
+        return res.status(400).json({ message: 'This account was registered using an external provider (e.g., Google). Please use that sign-in method.' });
+    }
+
+    const isMatch = await foundUser.comparePassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials.' });
+    }
+    
+    const payload = { user: { id: foundUser.id } };
+    const token = jwt.sign(payload, JWT_APP_SECRET, { expiresIn: '1d' }); 
 
     res.status(200).json({
       message: 'Logged in successfully!',
       token: token,
-      user: {
-        id: foundUser.id,
-        firstName: foundUser.firstName,
-        lastName: foundUser.lastName,
-        email: foundUser.email
-      }
+      user: { id: foundUser.id, firstName: foundUser.firstName, lastName: foundUser.lastName, email: foundUser.email }
     });
 
   } catch (err) {
-    console.error('Signin error:', err.message, err.stack);
-    res.status(500).json({ message: 'Server error during signin.', error: err.message });
+    console.error('Signin error:', err);
+    res.status(500).json({ message: 'Server error during signin.'});
+  }
+});
+
+// Google Sign-In/Sign-Up Route
+const googleAuthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+router.post('/google-login', async (req, res) => {
+  const { token: googleIdToken } = req.body;
+
+  if (!googleIdToken) {
+    return res.status(400).json({ message: "Google ID token is required." });
+  }
+  if (!GOOGLE_CLIENT_ID || !JWT_APP_SECRET) {
+    console.error("CRITICAL: GOOGLE_CLIENT_ID or JWT_SECRET is not configured for /google-login.");
+    return res.status(500).json({ message: "Server configuration error." });
+  }
+
+  try {
+    const ticket = await googleAuthClient.verifyIdToken({
+        idToken: googleIdToken,
+        audience: GOOGLE_CLIENT_ID, 
+    });
+    const googlePayload = ticket.getPayload();
+    
+    const { 
+        sub: googleId, 
+        email, 
+        name: googleFullName,
+        given_name: googleFirstName,
+        family_name: googleLastName,
+        // picture: googleProfilePicture 
+    } = googlePayload;
+
+    if (!email) {
+        return res.status(400).json({ message: "Email not provided by Google token." });
+    }
+
+    let user = await User.findOne({ googleId: googleId });
+
+    if (!user) {
+      user = await User.findOne({ email: email.toLowerCase() });
+      if (user) {
+        user.googleId = googleId;
+        if (!user.name && googleFullName) user.name = googleFullName;
+        if (!user.firstName && googleFirstName) user.firstName = googleFirstName;
+        if (!user.lastName && googleLastName) user.lastName = googleLastName;
+        await user.save();
+      } else {
+        user = new User({
+          googleId: googleId,
+          email: email.toLowerCase(),
+          name: googleFullName,
+          firstName: googleFirstName,
+          lastName: googleLastName,
+        });
+        await user.save();
+      }
+    }
+
+    const appTokenPayload = { user: { id: user.id } };
+    const soleVaultToken = jwt.sign(appTokenPayload, JWT_APP_SECRET, { expiresIn: '1d' });
+
+    res.json({ 
+      token: soleVaultToken,
+      user: { 
+        id: user.id,
+        name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      }
+    });
+
+  } catch (error) {
+    console.error('Error during Google authentication processing:', error);
+    if (error.message && (error.message.includes("Invalid token signature") || error.message.includes("Token used too late") || error.message.includes("Invalid value for \"audience\""))) {
+        return res.status(401).json({ message: 'Invalid or expired Google token. Please try signing in again.' });
+    }
+    res.status(500).json({ message: 'Google authentication failed on server.'});
   }
 });
 
