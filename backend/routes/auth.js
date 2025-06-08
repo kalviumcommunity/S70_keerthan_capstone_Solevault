@@ -74,6 +74,7 @@ router.post('/send-otp', async (req, res) => {
         // Send the OTP email
         await transporter.sendMail({
             from: `"SoleVault" <${EMAIL_FROM}>`,
+            replyTo:EMAIL_FROM,
             to: email,
             subject: 'Your SoleVault Verification Code',
             html: `<h1>Welcome to SoleVault!</h1><p>Your One-Time Password (OTP) is:</p><h2>${otp}</h2><p>This code will expire in 10 minutes.</p>`
