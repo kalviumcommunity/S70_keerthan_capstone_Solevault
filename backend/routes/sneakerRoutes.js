@@ -145,6 +145,21 @@ router.post('/upload-from-url', authMiddleware, async (req, res) => {
         return res.status(400).json({ message: 'Image URL is required.' });
     }
 
+
+    // --- NEW VALIDATION LOGIC ---
+    try {
+        // 1. Check if it's a valid URL format
+        const url = new URL(imageUrl);
+
+        // 2. Ensure it's using HTTP or HTTPS protocol
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            throw new Error('Invalid URL protocol.');
+        }
+    } catch (error) {
+        return res.status(400).json({ message: 'Invalid or disallowed Image URL.' });
+    }
+    // --- END VALIDATION ---
+
     try {
         // Use Cloudinary SDK to upload the image from the provided URL
         const result = await cloudinary.uploader.upload(imageUrl, {

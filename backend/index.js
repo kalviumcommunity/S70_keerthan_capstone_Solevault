@@ -33,9 +33,20 @@ const authLimiter = rateLimit({
 
 
 
+// NEW: Stricter rate limiter for AI routes
+const aiLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 15, // Limit each IP to 15 AI requests per 10 minutes
+    message: { message: 'Too many AI requests from this IP, please try again after 10 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+
+
 // Use defined routes
 app.use('/sneakers', authMiddleware,sneakerRoutes); // For sneaker-related routes
-app.use('/api/ai', authMiddleware, aiRoutes);
+app.use('/api/ai', authMiddleware,aiLimiter, aiRoutes);
 app.use('/auth', authLimiter,authRoutes);      // CORRECTED: Mount authRoutes under /auth
 
 // Your root route

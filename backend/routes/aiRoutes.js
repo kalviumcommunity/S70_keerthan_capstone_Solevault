@@ -1,11 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { body, validationResult } = require('express-validator');
 
 // Initialize the Google AI Client with your API key
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
 
-router.post('/autocomplete-sneaker', async (req, res) => {
+router.post('/autocomplete-sneaker', [ // <-- This array holds our validation rules
+        body('sneakerName')
+            .notEmpty().withMessage('Sneaker name cannot be empty.')
+            .trim()
+            .isLength({ min: 3, max: 100 }).withMessage('Sneaker name must be between 3 and 100 characters.')
+            .escape() // This helps prevent injection attacks
+    ], async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
     const { sneakerName } = req.body;
 
     if (!sneakerName) {
