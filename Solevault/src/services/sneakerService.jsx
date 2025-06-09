@@ -1,29 +1,28 @@
 // src/services/sneakerService.js
 
-// Define your backend API's base URL.
-// If your Vite dev server is configured to proxy /api to your backend,
-// you can just use '/api'. Otherwise, use the full backend URL (e.g., 'http://localhost:5000/api').
-const API_BASE_URL = 'https://s70-keerthan-capstone-solevault.onrender.com'; // Adjust if your backend is on a different port/domain during development
+// This now correctly reads the URL from your .env file
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Placeholder function to get the auth token.
-// You'll need to implement this based on how you store the token after login (e.g., localStorage).
 const getAuthToken = () => {
-  return localStorage.getItem('soleVaultToken'); // Example: token stored in localStorage
+  return localStorage.getItem('soleVaultToken');
 };
 
-// Helper function to handle API responses
 const handleResponse = async (response) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ message: response.statusText }));
     throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
   }
+  // For DELETE requests with no content
+  if (response.status === 204) {
+    return { message: 'Action completed successfully.' };
+  }
   return response.json();
 };
 
-// Fetch all sneakers for the authenticated user
+// --- FETCH SNEAKERS (No changes needed) ---
 export const fetchUserSneakers = async () => {
   const token = getAuthToken();
-  const response = await fetch(`${API_BASE_URL}/sneakers`, { // Assuming GET /api/sneakers is protected and user-specific
+  const response = await fetch(`${API_BASE_URL}/sneakers`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -33,55 +32,43 @@ export const fetchUserSneakers = async () => {
   return handleResponse(response);
 };
 
-// Add a new sneaker
+// --- ADD SNEAKER (Corrected) ---
 export const addSneaker = async (sneakerData) => {
   const token = getAuthToken();
-  // Prepare only the data expected by the backend schema
-  const payload = {
-    name: sneakerData.name,
-    brand: sneakerData.brand,
-    model: sneakerData.model,
-    releaseDate: sneakerData.releaseDate, // Ensure this is what the modal provides for this field
-    retailPrice: sneakerData.retailPrice,
-    marketValue: sneakerData.marketValue,
-    image: sneakerData.image,
-  };
-
+  
+  // No need to create a new payload object. We send sneakerData directly.
+  // This ensures 'description' and all other fields are included.
+  
   const response = await fetch(`${API_BASE_URL}/sneakers`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(sneakerData), // Pass the whole object
   });
   return handleResponse(response);
 };
 
-// Update an existing sneaker
+// --- UPDATE SNEAKER (Corrected) ---
 export const updateSneaker = async (sneakerId, sneakerData) => {
   const token = getAuthToken();
-  const payload = { /* Prepare only fields that can be updated */
-    name: sneakerData.name,
-    brand: sneakerData.brand,
-    model: sneakerData.model,
-    releaseDate: sneakerData.releaseDate,
-    retailPrice: sneakerData.retailPrice,
-    marketValue: sneakerData.marketValue,
-    image: sneakerData.image,
-  };
+
+  // No need to create a new payload object here either.
+  // We send the complete sneakerData object directly.
+
   const response = await fetch(`${API_BASE_URL}/sneakers/${sneakerId}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(sneakerData), // Pass the whole object
   });
   return handleResponse(response);
 };
 
-// Delete a sneaker
+// --- DELETE SNEAKER (No changes needed) ---
 export const deleteSneaker = async (sneakerId) => {
   const token = getAuthToken();
   const response = await fetch(`${API_BASE_URL}/sneakers/${sneakerId}`, {
@@ -90,13 +77,5 @@ export const deleteSneaker = async (sneakerId) => {
       'Authorization': `Bearer ${token}`,
     },
   });
-  // Delete often returns 200/204 with no content or a success message
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-  }
-  if (response.status === 204) { // No Content
-    return { message: 'Sneaker deleted successfully' };
-  }
-  return response.json();
+  return handleResponse(response);
 };

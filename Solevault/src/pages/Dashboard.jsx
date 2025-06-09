@@ -8,6 +8,7 @@ import CustomButton from "@/components/ui/CustomButton";
 import AddPairModal from "@/components/dashboard/AddPairModal";
 import EditPairModal from "@/components/dashboard/EditPairModal";
 import DeletePairModal from "@/components/dashboard/DeletePairModal";
+import SneakerDetailsModal from "@/components/dashboard/SneakerDetailsModal"; // 1. Import the new modal
 import { Filter, BarChart2, GridIcon, AlertTriangle, Loader2 } from "lucide-react";
 
 // Import service functions
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true); 
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [viewingSneaker, setViewingSneaker] = useState(null); // 2. Add new state for viewing details
 
   useEffect(() => {
     const loadSneakers = async () => {
@@ -60,6 +62,7 @@ const Dashboard = () => {
         retailPrice: parseFloat(newSneakerDataFromModal.price), // From AddModal's form
         marketValue: parseFloat(newSneakerDataFromModal.marketValue),
         image: newSneakerDataFromModal.image,
+        description: newSneakerDataFromModal.description,
       };
       console.log("DEBUG HAP: Payload for API:", JSON.parse(JSON.stringify(payloadForAPI)));
       const addedSneaker = await apiAddSneaker(payloadForAPI);
@@ -86,6 +89,7 @@ const Dashboard = () => {
   };
 
   const handleUpdatePair = async (updatedSneakerDataFromModal) => {
+    console.log("DEBUG HUP: 1. Data received from EditModal:", updatedSneakerDataFromModal);
     console.log("DEBUG HUP: 1. Data received from EditModal:", JSON.parse(JSON.stringify(updatedSneakerDataFromModal)));
     setIsSubmitting(true);
     setError(null);
@@ -106,7 +110,11 @@ const Dashboard = () => {
         retailPrice: parseFloat(updatedSneakerDataFromModal.retailPrice),
         marketValue: parseFloat(updatedSneakerDataFromModal.marketValue),
         image: updatedSneakerDataFromModal.image,
+        description: updatedSneakerDataFromModal.description,
       };
+  // --- ADD THIS CONSOLE.LOG ---
+        console.log("DEBUG HUP: 2. Payload being sent to backend for update:", payload);
+
       console.log("DEBUG HUP: 2. Payload for API:", JSON.parse(JSON.stringify(payload)));
       console.log("DEBUG HUP: 3. Sneaker ID for API update:", sneakerId);
 
@@ -194,6 +202,17 @@ const Dashboard = () => {
     );
   }
 
+
+    // 3. Add a new handler function to set the sneaker to be viewed
+    const handleViewDetails = (sneakerId) => {
+        const sneaker = sneakers.find(s => s.id === sneakerId || s._id === sneakerId);
+         // --- ADD THIS CONSOLE.LOG to see the data ---
+    console.log("DEBUG: Data for sneaker being viewed:", sneaker);
+        if (sneaker) {
+            setViewingSneaker(sneaker);
+        }
+    };
+
   return (
     <div className="min-h-screen bg-black flex flex-col">
       <Navbar />
@@ -242,7 +261,8 @@ const Dashboard = () => {
                   <CustomButton size="sm" variant="outline" className="flex items-center border-[#525252] text-[#d4d4d4] hover:bg-[#171717] hover:text-white">
                     <Filter size={16} className="mr-1" /> Filter
                   </CustomButton>
-                  <AddPairModal onAddPair={handleAddPair} />
+                  <AddPairModal onAddPair={handleAddPair} 
+                  isSubmitting={isSubmitting}/>
                   <div className="hidden sm:flex bg-[#1a1a1a] rounded-md overflow-hidden">
                     <button 
                       type="button"
@@ -269,6 +289,8 @@ const Dashboard = () => {
                 sneakers={sneakers}
                 onEditSneaker={handleEditSneaker}
                 onDeleteSneaker={handleDeleteSneakerRequest}
+                onViewDetails={handleViewDetails}
+                viewMode={viewMode}
               />
             </div>
             
@@ -307,6 +329,15 @@ const Dashboard = () => {
           onDeletePair={handleConfirmDeletePair}
         />
       )}
+
+      {/* 5. Conditionally render the new details modal */}
+            {viewingSneaker && (
+                <SneakerDetailsModal
+                    sneaker={viewingSneaker}
+                    open={!!viewingSneaker}
+                    onOpenChange={() => setViewingSneaker(null)} // Close modal by setting state to null
+                />
+            )}
     </div>
   );
 };
