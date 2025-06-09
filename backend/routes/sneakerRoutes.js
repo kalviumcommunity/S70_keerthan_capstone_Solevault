@@ -2,6 +2,7 @@
 const express = require('express');
 const Sneaker = require('../models/sneakerSchema'); // Adjust path if needed
 const authMiddleware = require('../middleware/authMiddleware'); 
+const cloudinary = require('../config/cloudinary');
 
 const router = express.Router();
 
@@ -100,7 +101,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
       new: true, // Return the modified document rather than the original
       runValidators: true, // Ensure schema validations are run on update
     });
-    
     res.json(updatedSneaker);
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -135,6 +135,30 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     console.error("Error deleting sneaker:", err);
     res.status(500).json({ message: err.message || 'Error deleting sneaker' });
   }
+});
+
+// === UPLOAD IMAGE FROM URL - PROTECTED ===
+router.post('/upload-from-url', authMiddleware, async (req, res) => {
+    const { imageUrl } = req.body;
+
+    if (!imageUrl) {
+        return res.status(400).json({ message: 'Image URL is required.' });
+    }
+
+    try {
+        // Use Cloudinary SDK to upload the image from the provided URL
+        const result = await cloudinary.uploader.upload(imageUrl, {
+            // You can add options here, like the folder to save to in Cloudinary
+            // folder: "solevault_sneakers", 
+        });
+
+        // Send the new, permanent Cloudinary URL back to the frontend
+        res.status(200).json({ secure_url: result.secure_url });
+
+    } catch (error) {
+        console.error("Cloudinary URL upload error:", error);
+        res.status(500).json({ message: 'Failed to upload image from URL.' });
+    }
 });
 
 module.exports = router;

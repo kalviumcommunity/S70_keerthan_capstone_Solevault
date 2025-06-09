@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const sneakerRoutes = require('./routes/sneakerRoutes'); // Import routes
+const authMiddleware = require('./middleware/authMiddleware');
+const aiRoutes = require('./routes/aiRoutes');
 const authRoutes = require('./routes/auth'); // This is your router from auth.js
 
 
@@ -32,7 +34,8 @@ const authLimiter = rateLimit({
 
 
 // Use defined routes
-app.use('/sneakers', sneakerRoutes); // For sneaker-related routes
+app.use('/sneakers', authMiddleware,sneakerRoutes); // For sneaker-related routes
+app.use('/api/ai', authMiddleware, aiRoutes);
 app.use('/auth', authLimiter,authRoutes);      // CORRECTED: Mount authRoutes under /auth
 
 // Your root route

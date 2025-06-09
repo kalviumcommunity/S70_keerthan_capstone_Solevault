@@ -8,7 +8,8 @@ const CollectionGrid = ({
   sneakers = [], // Default to empty array if sneakers prop is not provided
   onEditSneaker,
   onDeleteSneaker,
-  viewMode // Assuming this might be used later
+  onViewDetails, 
+  viewMode 
 }) => {
   
   // console.log("DEBUG: CollectionGrid received sneakers:", sneakers); // Log all sneakers received by the grid
@@ -44,25 +45,13 @@ const CollectionGrid = ({
 
             return (
               <SneakerCard
-                key={keyForReact}
-                // Ensure the 'id' prop passed to SneakerCard is the actual string ID
-                id={idToUse ? idToUse.toString() : undefined} 
-                name={sneaker.name}
-                brand={sneaker.brand}
-                model={sneaker.model}
-                releaseDate={sneaker.releaseDate}
-                retailPrice={sneaker.retailPrice}
-                marketValue={sneaker.marketValue}
-                // Calculate or ensure changePercentage is present if SneakerCard expects it
-                changePercentage={
-                  typeof sneaker.changePercentage === 'number' 
-                  ? sneaker.changePercentage 
-                  : (sneaker.retailPrice && sneaker.marketValue ? ((sneaker.marketValue - sneaker.retailPrice) / sneaker.retailPrice * 100) : 0)
-                }
-                image={sneaker.image}
-                onEdit={onEditSneaker}
-                onDelete={onDeleteSneaker}
-              />
+    key={sneaker._id || sneaker.id}
+    {...sneaker} // <-- This one line passes: name, brand, model, description, image, etc.
+    id={sneaker._id || sneaker.id} // We pass `id` again just to ensure it's the correct one
+    onEdit={onEditSneaker}
+    onDelete={onDeleteSneaker}
+    onViewDetails={onViewDetails}
+/>
             );
           })}
         </div>

@@ -39,6 +39,9 @@ const sneakerSchema = new mongoose.Schema({
     trim: true,
     default: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80' // Optional default
   },
+
+   description: { type: String, trim: true },
+   
   // IMPORTANT: For a multi-user application, you'll need to associate sneakers with a user
   userId: {
     type: mongoose.Schema.Types.ObjectId,
