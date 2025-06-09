@@ -40,7 +40,7 @@ const EditPairModal = ({ open, onOpenChange, sneaker, onUpdatePair, isSubmitting
                 setIsAiLoading(true);
                 try {
                     const token = localStorage.getItem('soleVaultToken');
-                    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/sneakers/autocomplete-sneaker`, { sneakerName: formData.name }, { headers: { Authorization: `Bearer ${token}` } });
+                    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/ai/autocomplete-sneaker`, { sneakerName: formData.name }, { headers: { Authorization: `Bearer ${token}` } });
                     const { brand, description } = response.data;
                     setFormData(prev => ({ ...prev, brand: brand || prev.brand, description: description || prev.description }));
                 } catch (error) { console.error('AI Autocomplete failed:', error); }
