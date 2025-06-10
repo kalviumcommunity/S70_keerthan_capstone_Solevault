@@ -77,9 +77,9 @@ const Footer = () => {
                 <Link to="/privacy" className="text-[#999999] hover:text-[#fafafa]"> {/* Replaced text-solevault-400, hover:text-solevault-100 */}
                   Privacy Policy
                 </Link>
-              </li>
+              </li>          
               <li>
-                <Link to="/cookies" className="text-[#999999] hover:text-[#fafafa]"> {/* Replaced text-solevault-400, hover:text-solevault-100 */}
+                <Link to="/cookie-policy" className="text-[#999999] hover:text-[#fafafa]"> {/* **Replaced text-solevault-400, hover:text-solevault-100 */}
                   Cookie Policy
                 </Link>
               </li>
