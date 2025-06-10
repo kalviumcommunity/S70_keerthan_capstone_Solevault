@@ -4,7 +4,7 @@ import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
-// --- PASTE THE HTML CODE FROM TERMLY INSIDE THE BACKTICKS (`) ---
+// -------PASTE THE HTML CODE FROM TERMLY INSIDE THE BACKTICKS (`) ---
 const cookiePolicyHtml = `
 <style>
   [data-custom-class='body'], [data-custom-class='body'] * {
