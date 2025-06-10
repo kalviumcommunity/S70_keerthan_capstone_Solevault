@@ -14,6 +14,7 @@ import SignUp from "./pages/SignUp";
 import Community from "./pages/Community";
 import ProtectedRoute from "./components/utility/ProtectedRoute";
 import { GoogleOAuthProvider } from '@react-oauth/google'; // You have this
+import AboutPage from "./pages/AboutPage";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/about" element={<AboutPage/>}/>
               <Route 
                 path="/analytics" 
                 element={
