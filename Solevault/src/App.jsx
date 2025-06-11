@@ -60,6 +60,7 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/privacy" element={<PrivacyPolicyPage/>}/>
               <Route 
                 path="/analytics" 
                 element={
