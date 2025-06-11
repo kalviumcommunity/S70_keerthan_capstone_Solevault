@@ -14,6 +14,9 @@ import SignUp from "./pages/SignUp";
 import Community from "./pages/Community";
 import ProtectedRoute from "./components/utility/ProtectedRoute";
 import { GoogleOAuthProvider } from '@react-oauth/google'; // You have this
+import AboutPage from "./pages/AboutPage";
+import CookiePolicyPage from "./pages/CookiePolicyPage"; 
+
 
 const queryClient = new QueryClient();
 
@@ -60,7 +63,9 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
-              <Route path="/privacy" element={<PrivacyPolicyPage/>}/>
+<Route path="/privacy" element={<PrivacyPolicyPage />} />
+<Route path="/about" element={<AboutPage />} />
+<Route path="/cookie-policy" element={<CookiePolicyPage />} />
               <Route 
                 path="/analytics" 
                 element={
@@ -81,6 +86,7 @@ const App = () => (
               {/* Catch-all Not Found Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            
           </TooltipProvider>
         </QueryClientProvider>
       </BrowserRouter>
