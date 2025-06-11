@@ -63,8 +63,9 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
-              <Route path="/about" element={<AboutPage/>}/>
-              <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+<Route path="/privacy" element={<PrivacyPolicyPage />} />
+<Route path="/about" element={<AboutPage />} />
+<Route path="/cookie-policy" element={<CookiePolicyPage />} />
               <Route 
                 path="/analytics" 
                 element={
