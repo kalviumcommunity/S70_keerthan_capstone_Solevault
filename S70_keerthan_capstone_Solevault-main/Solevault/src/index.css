@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Your original Tailwind CSS import method */
+/* Note: If this causes issues, the standard method is:
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   But this version keeps your original import. */
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #121212;
+    --foreground: #fafafa;
+
+    --card: #1a1a1a;
+    --card-foreground: #fafafa;
+
+    --popover: #1a1a1a;
+    --popover-foreground: #fafafa;
+
+    --primary: #171717;
+    --primary-foreground: #fafafa;
+
+    --secondary: #212121;
+    --secondary-foreground: #fafafa;
+
+    --muted: #262626;
+    --muted-foreground: #999999;
+
+    --accent: #212121;
+    --accent-foreground: #fafafa;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #fafafa;
+
+    --border: #262626;
+    --input: #262626;
+    --ring: #d4d4d4;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: #121212;
+    --sidebar-foreground: #fafafa;
+
+    --sidebar-primary: #212121;
+    --sidebar-primary-foreground: #fafafa;
+
+    --sidebar-accent: #1c1c1c;
+    --sidebar-accent-foreground: #fafafa;
+
+    --sidebar-border: #262626;
+    --sidebar-ring: #d4d4d4;
+  }
+}
+
+
+@layer base {
+  * {
+    /* @apply border-border; */
+    /* Sets the default border color if a border is applied elsewhere. */
+    /* It does not add a border to all elements by itself. */
+    border-color: #262626; /* Matches your --border variable */
+  }
+
+  body {
+    /* @apply bg-black text-foreground font-sans; */
+    background-color: #000000;
+    color: #fafafa; /* Matches your --foreground variable */
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* Added Inter as primary */
+  }
+
+  .solevault-gradient-text {
+    /* @apply bg-clip-text text-transparent bg-gradient-to-r from-solevault-100 to-solevault-300; */
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, #fafafa, #999999); /* Your original gradient colors */
+  }
+
+  .solevault-card {
+    /* @apply bg-solevault-800 border border-solevault-700 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300; */
+    background-color: #1a1a1a; /* Matches your --card variable */
+    border: 1px solid #262626; /* Matches your --border variable */
+    border-radius: 0.5rem; /* Matches your --radius variable, original 'rounded-lg' equivalent */
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* shadow-lg */
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms; /* duration-300 */
+  }
+
+  .solevault-card:hover {
+    /* hover:shadow-xl */
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  .solevault-button {
+    /* @apply px-4 py-2 bg-solevault-900 text-solevault-100 rounded-md border border-solevault-700 hover:bg-solevault-800 transition-colors duration-200 font-medium; */
+    padding-left: 1rem; /* px-4 */
+    padding-right: 1rem; /* px-4 */
+    padding-top: 0.5rem; /* py-2 */
+    padding-bottom: 0.5rem; /* py-2 */
+    background-color: #121212; /* Your original button background */
+    color: #fafafa; /* Your original button text color */
+    border-radius: 0.375rem; /* rounded-md */
+    border: 1px solid #262626; /* Your original button border */
+    font-weight: 500; /* font-medium */
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms; /* duration-200 */
+  }
+
+  .solevault-button:hover {
+    /* hover:bg-solevault-800 */
+    background-color: #1a1a1a; /* Your original button hover background */
+  }
+
+  .solevault-container {
+    /* @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; */
+    max-width: 80rem; /* max-w-7xl */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem; /* px-4 */
+    padding-right: 1rem; /* px-4 */
+  }
+
+  @media (min-width: 640px) { /* sm: */
+    .solevault-container {
+      /* sm:px-6 */
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) { /* lg: */
+    .solevault-container {
+      /* lg:px-8 */
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+} /* End of the second @layer base block */
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #171717; /* Your original track color */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #404040; /* Your original thumb color */
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #525252; /* Your original thumb hover color */
+}
+
+/* Styles for the Sign Up Page Background - ADDED AS REQUESTED */
+.page-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem; /* For spacing on smaller screens */
+
+  /* Adjust the overlay color and opacity (0.0 to 1.0) as needed */
+  /* Using a dark overlay; 18,18,18 is #121212 (your --background) */
+  background-image:
+    linear-gradient(rgba(18, 18, 18, 0.8), rgba(18, 18, 18, 0.9)),
+    url('/images/sneaker-bg.jpg'); /* Ensure this path is correct, relative to your public folder */
+
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Optional: for a fixed background effect on scroll */
+}
+
+/* NO EXTRA BRACE AT THE END OF THE FILE */
