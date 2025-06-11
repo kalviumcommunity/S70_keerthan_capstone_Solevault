@@ -16,6 +16,7 @@ import ProtectedRoute from "./components/utility/ProtectedRoute";
 import { GoogleOAuthProvider } from '@react-oauth/google'; // You have this
 import AboutPage from "./pages/AboutPage";
 import CookiePolicyPage from "./pages/CookiePolicyPage"; 
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 
 const queryClient = new QueryClient();
