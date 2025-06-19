@@ -181,4 +181,20 @@
   background-attachment: fixed; /* Optional: for a fixed background effect on scroll */
 }
 
+/* Custom styles to make policy pages readable on a dark background */
+.policy-content h1,
+.policy-content h2,
+.policy-content h3,
+.policy-content h4,
+.policy-content p,
+.policy-content strong,
+.policy-content li {
+    color: #FFFFFF; /* A nice, readable light gray */
+}
+
+.policy-content a {
+    color: #7dd3fc; /* A light blue for links, so they stand out */
+    text-decoration: underline;
+}
+
 /* NO EXTRA BRACE AT THE END OF THE FILE */
