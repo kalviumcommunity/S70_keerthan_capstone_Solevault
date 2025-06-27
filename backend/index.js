@@ -8,6 +8,8 @@ const sneakerRoutes = require('./routes/sneakerRoutes'); // Import routes
 const authMiddleware = require('./middleware/authMiddleware');
 const aiRoutes = require('./routes/aiRoutes');
 const authRoutes = require('./routes/auth'); // This is your router from auth.js
+const http = require('http'); // 1. Import the http module
+const { WebSocketServer } = require('ws'); // 2. Import the WebSocketServer
 
 
 
@@ -16,6 +18,32 @@ const app = express();
 
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors()); // Middleware to enable CORS
+
+const server = http.createServer(app);
+
+const wss = new WebSocketServer({ server });
+
+
+// 5. Set up the WebSocket connection logic
+wss.on('connection', (ws) => {
+  console.log('A new client connected!');
+
+  // When a message is received from a client...
+  ws.on('message', (message) => {
+    console.log(`Received message => ${message}`);
+    
+    // Broadcast the received message to all connected clients
+    wss.clients.forEach((client) => {
+      if (client.readyState === ws.OPEN) {
+        client.send(message.toString());
+      }
+    });
+  });
+
+  ws.on('close', () => {
+    console.log('Client has disconnected.');
+  });
+});
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -55,4 +83,4 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log(`Server is running on port http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Server (HTTP and WebSocket) is running on port http://localhost:${PORT}`));

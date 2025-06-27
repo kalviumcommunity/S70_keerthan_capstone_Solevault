@@ -2,6 +2,7 @@ import React from "react";
 import Navbar from "@/components/layout/Navbar"; // Assumed to be hex-coded
 import Footer from "@/components/layout/Footer";   // Assumed to be hex-coded
 import CommunityFeed from "@/components/community/CommunityFeed"; // Assumed to be hex-coded
+import LiveCommentFeed from "@/components/community/LiveCommentFeed"; // 1. IMPORT THE NEW COMPONENT
 import { Button } from "@/components/ui/button"; // Assumed to be hex-coded internally for variants
 import { UserPlus } from "lucide-react";
 
@@ -19,6 +20,7 @@ const Community = () => {
             </Button>
           </div>
           <CommunityFeed />
+          <LiveCommentFeed/>
         </div>
       </main>
       <Footer />
