@@ -1,10 +1,11 @@
 // backend/routes/auth.js
 const crypto = require('crypto');
 const express = require('express');
+const nodemailer=require('nodemailer');
+const crypto = require('crypto');
 const router = express.Router();
 const User = require('../models/User'); // Adjust path if necessary
 const PreVerificationUser = require('../models/PreVerificationUser');
-const nodemailer=require('nodemailer');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 
