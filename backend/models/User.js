@@ -34,6 +34,14 @@ const userSchema = new mongoose.Schema({
         // The minlength validator has been REMOVED.
         // Password length validation should be done in your route handler BEFORE hashing.
     },
+
+     passwordResetToken: {
+        type: String
+    },
+    passwordResetExpires: {
+        type: Date
+    },
+
     googleId: {
         type: String,
         unique: true,
@@ -43,6 +51,7 @@ const userSchema = new mongoose.Schema({
     // The 'createdAt' field below is redundant because the 'timestamps: true' option handles it automatically.
     // I've removed it for clarity.
 }, { timestamps: true }); // This automatically adds `createdAt` and `updatedAt` fields.
+
 
 // --- CORRECTED PASSWORD HASHING LOGIC ---
 userSchema.pre('save', async function (next) {

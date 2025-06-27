@@ -7,6 +7,20 @@ const getAuthToken = () => {
   return localStorage.getItem('soleVaultToken');
 };
 
+// This helper creates the authorization headers.
+const getAuthHeaders = () => {
+    const token = getAuthToken();
+    if (!token) {
+        // This can help in debugging if the token is missing.
+        console.error("Authentication token not found in localStorage.");
+        return { 'Content-Type': 'application/json' };
+    }
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+    };
+};
+
 const handleResponse = async (response) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ message: response.statusText }));
@@ -19,63 +33,39 @@ const handleResponse = async (response) => {
   return response.json();
 };
 
-// --- FETCH SNEAKERS (No changes needed) ---
+// --- CORRECTED API FUNCTIONS ---
+
 export const fetchUserSneakers = async () => {
-  const token = getAuthToken();
   const response = await fetch(`${API_BASE_URL}/sneakers`, {
     method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(), // Use the helper function
   });
   return handleResponse(response);
 };
 
-// --- ADD SNEAKER (Corrected) ---
 export const addSneaker = async (sneakerData) => {
-  const token = getAuthToken();
-  
-  // No need to create a new payload object. We send sneakerData directly.
-  // This ensures 'description' and all other fields are included.
-  
   const response = await fetch(`${API_BASE_URL}/sneakers`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(sneakerData), // Pass the whole object
+    headers: getAuthHeaders(), // Use the helper function
+    body: JSON.stringify(sneakerData),
   });
   return handleResponse(response);
 };
 
-// --- UPDATE SNEAKER (Corrected) ---
 export const updateSneaker = async (sneakerId, sneakerData) => {
-  const token = getAuthToken();
-
-  // No need to create a new payload object here either.
-  // We send the complete sneakerData object directly.
-
   const response = await fetch(`${API_BASE_URL}/sneakers/${sneakerId}`, {
     method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(sneakerData), // Pass the whole object
+    headers: getAuthHeaders(), // Use the helper function
+    body: JSON.stringify(sneakerData),
   });
   return handleResponse(response);
 };
 
-// --- DELETE SNEAKER (No changes needed) ---
 export const deleteSneaker = async (sneakerId) => {
-  const token = getAuthToken();
   const response = await fetch(`${API_BASE_URL}/sneakers/${sneakerId}`, {
     method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(), // Use the helper function
   });
   return handleResponse(response);
 };
+

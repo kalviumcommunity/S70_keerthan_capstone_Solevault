@@ -17,6 +17,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google'; // You have this
 import AboutPage from "./pages/AboutPage";
 import CookiePolicyPage from "./pages/CookiePolicyPage"; 
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 
 const queryClient = new QueryClient();
@@ -46,6 +48,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
+               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
               {/* Protected Routes */}
               <Route 
