@@ -3,7 +3,6 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CollectionGrid from "@/components/dashboard/CollectionGrid";
 import MarketAnalytics from "@/components/marketplace/MarketAnalytics";
-import CommunityFeed from "@/components/community/CommunityFeed";
 import CustomButton from "@/components/ui/CustomButton";
 import AddPairModal from "@/components/dashboard/AddPairModal";
 import EditPairModal from "@/components/dashboard/EditPairModal";
@@ -297,12 +296,7 @@ const Dashboard = () => {
             <div className="w-full lg:w-1/3 space-y-8">
               <MarketAnalytics />
               <div className="bg-[#262626] border border-[#404040] rounded-lg shadow-lg p-5">
-                <h3 className="text-lg font-semibold text-[#f5f5f5] mb-4">Community Highlights</h3>
-                <CommunityFeed />
                 <div className="mt-4 text-center">
-                  <CustomButton variant="ghost" size="sm" className="text-[#d4d4d4] hover:text-white hover:bg-[#262626]">
-                    View Community
-                  </CustomButton>
                 </div>
               </div>
             </div>
