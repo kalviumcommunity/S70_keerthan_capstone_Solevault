@@ -136,6 +136,12 @@ const SignIn = () => {
                 </FormItem>
               )}
             />
+
+            <div className="text-right text-sm">
+    <Link to="/forgot-password" className="font-medium text-neutral-400 hover:text-white hover:underline">
+        Forgot Password?
+    </Link>
+</div>
             <CustomButton 
               type="submit" 
               className="w-full bg-gradient-to-r from-[#374151] to-[#1f2937] hover:from-[#4b5563] hover:to-[#374151] text-[#ffffff] font-semibold py-3 rounded-md transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#6b7280] focus:ring-opacity-50 disabled:opacity-50"

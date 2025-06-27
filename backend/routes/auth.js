@@ -1,4 +1,5 @@
 // backend/routes/auth.js
+const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); // Adjust path if necessary
@@ -260,6 +261,94 @@ router.post('/google-login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid or expired Google token. Please try signing in again.' });
         }
         res.status(500).json({ message: 'Google authentication failed on server.'});
+    }
+});
+
+
+//=========================================================
+// --- FORGOT PASSWORD ENDPOINT ---
+//=========================================================
+router.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email: email.toLowerCase() });
+        // IMPORTANT: Always send a success message, even if the user is not found.
+        // This prevents attackers from figuring out which emails are registered.
+        if (!user) {
+            return res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+        }
+
+        // 1. Generate a secure random token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+
+        // 2. Hash the token and set it on the user object
+        user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // Token expires in 10 minutes
+
+        await user.save();
+
+        // 3. Create the reset URL and send the email
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+        
+        const transporter = nodemailer.createTransport({ 
+             host: 'smtp.sendgrid.net',
+    port: 587, // or 465
+    auth: {
+        user: 'apikey', // This is the literal string 'apikey' for SendGrid
+        pass: process.env.SENDGRID_API_KEY // Your secret key from .env
+    }
+        });
+
+        await transporter.sendMail({
+            from: `"SoleVault" <${process.env.EMAIL_FROM}>`,
+            to: user.email,
+            subject: 'Your SoleVault Password Reset Link',
+            html: `<p>You are receiving this because you (or someone else) have requested the reset of the password for your account.</p>
+                   <p>Please click on the following link, or paste this into your browser to complete the process:</p>
+                   <p><a href="${resetUrl}">${resetUrl}</a></p>
+                   <p>This link will expire in 10 minutes.</p>
+                   <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>`
+        });
+
+        res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+
+    } catch (error) {
+        console.error("Forgot password error:", error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+});
+
+
+//=========================================================
+// --- RESET PASSWORD ENDPOINT ---
+//=========================================================
+router.post('/reset-password/:token', async (req, res) => {
+    try {
+        // 1. Hash the incoming token from the URL so we can find it in the database
+        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+        // 2. Find the user by the hashed token and check if it has not expired
+        const user = await User.findOne({
+            passwordResetToken: hashedToken,
+            passwordResetExpires: { $gt: Date.now() } // $gt means "greater than"
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
+        }
+
+        // 3. Set the new password
+        user.password = req.body.password; // The pre-save hook in your User model will automatically hash this new password
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+
+        await user.save();
+
+        res.json({ message: 'Password has been reset successfully. Please log in.' });
+
+    } catch (error) {
+        console.error("Reset password error:", error);
+        res.status(500).json({ message: 'Server error.' });
     }
 });
 
