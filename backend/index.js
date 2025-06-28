@@ -18,6 +18,9 @@ const { WebSocketServer } = require('ws'); // 2. Import the WebSocketServer
 
 const app = express();
 
+app.set('trust proxy', 1);
+
+
 
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors()); // Middleware to enable CORS
