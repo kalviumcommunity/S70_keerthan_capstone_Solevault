@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const cron = require('node-cron'); // 1. Import node-cron
 const Sneaker = require('./models/sneakerSchema'); // 2. Import your Sneaker model
 const sneakerRoutes = require('./routes/sneakerRoutes'); // Import routes
+const paymentRoutes = require('./routes/paymentRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
 const aiRoutes = require('./routes/aiRoutes');
 const authRoutes = require('./routes/auth'); // This is your router from auth.js
@@ -78,6 +79,8 @@ const aiLimiter = rateLimit({
 app.use('/sneakers', authMiddleware,sneakerRoutes); // For sneaker-related routes
 app.use('/api/ai', authMiddleware,aiLimiter, aiRoutes);
 app.use('/auth', authLimiter,authRoutes);      // CORRECTED: Mount authRoutes under /auth
+app.use('/api/payments', paymentRoutes);
+
 
 // Your root route
 app.get('/', (req, res) => {
@@ -91,7 +94,7 @@ app.get('/', (req, res) => {
 // In a real app, you might run it once a day ('0 0 * * *').
 console.log('Scheduling the sneaker market value update job...');
 
-cron.schedule('*/2 * * * *', async () => {
+cron.schedule('0 0 * * *', async () => {
     console.log('--- Running cron job: Updating market values ---');
     try {
         const sneakers = await Sneaker.find({});

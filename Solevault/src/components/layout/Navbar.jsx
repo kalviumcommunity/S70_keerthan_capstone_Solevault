@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Search, User, Bell, Menu, X, LogIn, LogOut } from "lucide-react"; 
 import CustomButton from "../ui/CustomButton"; // Assuming this path is correct
+import UpgradeButton from '@/components/payments/UpgradeButton';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -68,6 +69,7 @@ const Navbar = () => {
 
           {isAuthenticated && currentUser ? (
             <>
+              <UpgradeButton /> 
               <span className="text-[#d4d4d4] text-sm">
                 Hi, {currentUser.firstName || currentUser.name || currentUser.email}
               </span>

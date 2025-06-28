@@ -19,6 +19,7 @@ import CookiePolicyPage from "./pages/CookiePolicyPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
 
 
 const queryClient = new QueryClient();
@@ -50,6 +51,9 @@ const App = () => (
               <Route path="/signup" element={<SignUp />} />
                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+      <Route path="/payment-success" element={<PaymentSuccessPage />} />
+
+      
 
               {/* Protected Routes */}
               <Route 
