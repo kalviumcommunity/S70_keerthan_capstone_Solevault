@@ -4,6 +4,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const cron = require('node-cron'); // 1. Import node-cron
+const Sneaker = require('./models/sneakerSchema'); // 2. Import your Sneaker model
 const sneakerRoutes = require('./routes/sneakerRoutes'); // Import routes
 const authMiddleware = require('./middleware/authMiddleware');
 const aiRoutes = require('./routes/aiRoutes');
@@ -80,6 +82,42 @@ app.use('/auth', authLimiter,authRoutes);      // CORRECTED: Mount authRoutes un
 // Your root route
 app.get('/', (req, res) => {
   res.send(`Hello, my backend server is running`);
+});
+
+
+
+// --- SCHEDULED CRON JOB ---
+// This schedule ('*/2 * * * *') runs every 2 minutes for easy demonstration.
+// In a real app, you might run it once a day ('0 0 * * *').
+console.log('Scheduling the sneaker market value update job...');
+
+cron.schedule('*/2 * * * *', async () => {
+    console.log('--- Running cron job: Updating market values ---');
+    try {
+        const sneakers = await Sneaker.find({});
+        if (sneakers.length === 0) {
+            console.log('No sneakers in the database to update.');
+            return;
+        }
+
+        let updatedCount = 0;
+        // In a real app, you would call an external API for each sneaker.
+        // Here, we'll just simulate a market value change.
+        for (const sneaker of sneakers) {
+            // Simulate a random +/- 5% change in market value
+            const changeFactor = 1 + (Math.random() - 0.5) / 10; // e.g., a number between 0.95 and 1.05
+            const newMarketValue = sneaker.marketValue * changeFactor;
+            
+            sneaker.marketValue = parseFloat(newMarketValue.toFixed(2));
+            await sneaker.save();
+            updatedCount++;
+        }
+        
+        console.log(`Cron job finished: Updated ${updatedCount} sneakers.`);
+
+    } catch (error) {
+        console.error('Error during cron job execution:', error);
+    }
 });
 
 const PORT = process.env.PORT || 8000;
